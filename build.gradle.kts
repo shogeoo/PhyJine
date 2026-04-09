@@ -2,8 +2,8 @@ plugins {
     id("java")
 }
 
-group = "io.github.shogeo.partsim"
-version = "1.0-SNAPSHOT"
+group = "io.github.shogeo.phyjine"
+version = "0.0.0"
 
 repositories {
     mavenCentral()
