@@ -5,7 +5,7 @@ import io.github.shogeo.phyjine.utils.Vector2D;
 
 public class CircleCollider extends Collider {
 
-    public double radius;
+    private final double radius;
 
     public CircleCollider(Vector2D position, double angle, double radius, Material material) {
         this.position = position;
@@ -13,10 +13,14 @@ public class CircleCollider extends Collider {
         this.radius = radius;
         this.material = material;
 
-        this.mass = Math.PI * radius * radius * material.density;
+        this.mass = Math.PI * radius * radius * material.getDensity();
 
         this.inverseMass = 1 / mass;
 
         this.momentOfInertia = 0.5 * this.mass * radius * radius;
+    }
+
+    public double getRadius() {
+        return radius;
     }
 }

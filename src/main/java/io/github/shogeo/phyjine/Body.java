@@ -4,53 +4,61 @@ import io.github.shogeo.phyjine.colliders.Collider;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
 public class Body {
-    Collider[] colliders;
+    private final Collider[] colliders;
 
-    Vector2D position;
-    double angle;
+    private Vector2D position;
+    private double angle;
 
-    Vector2D localCenterOfMass;
+    private final Vector2D localCenterOfMass;
 
-    Vector2D velocity;
-    double angularVelocity;
+    private Vector2D velocity;
+    private double angularVelocity;
 
-    Vector2D force;
-    double torque;
+    private Vector2D force;
+    private double torque;
 
-    double mass, momentOfInertia;
-    double inverseMass, inverseMomentOfInertia;
+    private final double mass;
+    private final double momentOfInertia;
+    private final double inverseMass;
+    private final double inverseMomentOfInertia;
 
     public Body(Vector2D position, double angle, Collider... colliders) {
         this.position = position;
         this.angle = angle;
         this.colliders = colliders;
 
-        for (int i = 0; i < colliders.length; i++) {
-            Collider c = colliders[i];
-            mass += c.mass;
-        }
-        inverseMass = 1 / mass;
+        this.mass = calculateMass();
+        this.inverseMass = 1 / mass;
 
+        this.localCenterOfMass = calculateLocalCenterOfMass();
+        this.momentOfInertia = calculateMomentOfInertia();
+        this.inverseMomentOfInertia = 1 / momentOfInertia;
+    }
+
+    private double calculateMass() {
+        double totalMass = 0;
+        for (Collider c : colliders) {
+            totalMass += c.getMass();
+        }
+        return totalMass;
+    }
+
+    private Vector2D calculateLocalCenterOfMass() {
         double xCOM = 0, yCOM = 0;
-
-        for (int i = 0; i < colliders.length; i++) {
-            Collider c = colliders[i];
-            xCOM += c.position.x * c.mass;
-            yCOM += c.position.y * c.mass;
+        for (Collider c : colliders) {
+            xCOM += c.getPosition().getX() * c.getMass();
+            yCOM += c.getPosition().getY() * c.getMass();
         }
-        xCOM /= mass;
-        yCOM /= mass;
+        return new Vector2D(xCOM / mass, yCOM / mass);
+    }
 
-        localCenterOfMass = new Vector2D(xCOM, yCOM);
-
-        for (int i = 0; i < colliders.length; i++) {
-            Collider c = colliders[i];
-            Vector2D positionOfColliderFromCOM = c.position.subtract(localCenterOfMass);
+    private double calculateMomentOfInertia() {
+        double totalMomentOfInertia = 0;
+        for (Collider c : colliders) {
+            Vector2D positionOfColliderFromCOM = c.getPosition().subtract(localCenterOfMass);
             double distance2 = positionOfColliderFromCOM.lengthSquared();
-            double oneCollider = c.momentOfInertia + c.mass * distance2;
-            momentOfInertia += oneCollider;
+            totalMomentOfInertia += c.getMomentOfInertia() + c.getMass() * distance2;
         }
-
-        inverseMomentOfInertia = 1 / momentOfInertia;
+        return totalMomentOfInertia;
     }
 }

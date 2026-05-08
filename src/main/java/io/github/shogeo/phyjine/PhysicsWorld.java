@@ -1,15 +1,16 @@
 package io.github.shogeo.phyjine;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PhysicsWorld {
 
-    final double GRAVITY;
+    private final double gravity;
 
-    ArrayList<Body> bodies = new ArrayList<Body>();
+    private final List<Body> bodies = new ArrayList<>();
 
     public PhysicsWorld(double gravity) {
-        this.GRAVITY = gravity;
+        this.gravity = gravity;
     }
 
     void step(double dt) {
