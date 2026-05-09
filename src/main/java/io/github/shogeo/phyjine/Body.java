@@ -9,16 +9,12 @@ public class Body {
     private final AABB aabb;
 
     private final Vector2D localCenterOfMass;
-
-    private Vector2D position;
-    private double angle;
-
     private final double mass;
     private final double momentOfInertia;
-
     private final double inverseMass;
     private final double inverseMomentOfInertia;
-
+    private Vector2D position;
+    private double angle;
     private Vector2D velocity;
     private double angularVelocity;
 
@@ -109,6 +105,7 @@ public class Body {
     void applyForce(Vector2D force) {
         this.force = this.force.add(force);
     }
+
     void applyTorque(double torque) {
         this.torque += torque;
     }
@@ -116,6 +113,7 @@ public class Body {
     void resetForce() {
         this.force = new Vector2D(0, 0);
     }
+
     void resetTorque() {
         this.torque = 0;
     }
@@ -124,6 +122,7 @@ public class Body {
     double getMass() {
         return mass;
     }
+
     double getMomentOfInertia() {
         return momentOfInertia;
     }
@@ -131,6 +130,7 @@ public class Body {
     public double getInverseMass() {
         return inverseMass;
     }
+
     public double getInverseMomentOfInertia() {
         return inverseMomentOfInertia;
     }
@@ -138,6 +138,7 @@ public class Body {
     public Vector2D getPosition() {
         return position;
     }
+
     public double getAngle() {
         return angle;
     }
@@ -145,6 +146,7 @@ public class Body {
     public Vector2D getVelocity() {
         return velocity;
     }
+
     public double getAngularVelocity() {
         return angularVelocity;
     }
@@ -155,5 +157,9 @@ public class Body {
 
     public Collider[] getColliders() {
         return colliders;
+    }
+
+    public Vector2D getLocalCenterOfMass() {
+        return localCenterOfMass;
     }
 }

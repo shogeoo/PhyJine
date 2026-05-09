@@ -27,7 +27,6 @@ public class CollisionDetector {
             for (Collider colliderB : collidersB) {
                 if (colliderA.getAabb().intersects(colliderB.getAabb())) {
                     // TODO: Handle collision
-                    IO.println("Зафиксировано пересечение коллайдеров");
                 }
             }
         }

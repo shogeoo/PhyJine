@@ -1,25 +1,23 @@
 package io.github.shogeo.phyjine;
 
-import io.github.shogeo.phyjine.colliders.CircleCollider;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.renderer.Camera;
+import io.github.shogeo.phyjine.renderer.RenderWindow;
+
+import javax.swing.SwingUtilities;
 
 public class Main {
     static void main() {
+        PhysicsWorld world = new PhysicsWorld(0);
+
+        Camera camera = new Camera();
+        RenderWindow window = new RenderWindow("PhyJine", camera);
+        SwingUtilities.invokeLater(window::show);
 
         long lastIterationStartTime;
         long currentIterationStartTime;
         double dt;
 
         long epoch = 1_000_000_000L;
-
-        PhysicsWorld main = new PhysicsWorld(-9.81);
-
-        Material test = new Material(1000, 0.75, 0.5, 0.05, 0);
-
-        CircleCollider c = new CircleCollider(new Vector2D(0, 0), 0, 0.5, test);
-        Body b = new Body(new Vector2D(0, 0), 0, c);
-
-        main.addBody(b);
 
         lastIterationStartTime = System.nanoTime();
 
@@ -28,9 +26,9 @@ public class Main {
             dt = (double) (currentIterationStartTime - lastIterationStartTime) / epoch;
             lastIterationStartTime = currentIterationStartTime;
 
-            main.step(dt);
+            world.step(dt);
 
-
+            window.render(world.getBodies());
         }
     }
 }

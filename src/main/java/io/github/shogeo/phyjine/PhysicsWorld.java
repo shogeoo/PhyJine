@@ -17,11 +17,15 @@ public class PhysicsWorld {
         this.collisionDetector = new CollisionDetector();
     }
 
-    void addBody(Body body) {
+    public void addBody(Body body) {
         bodies.add(body);
     }
 
-    void step(double dt) {
+    public List<Body> getBodies() {
+        return bodies;
+    }
+
+    public void step(double dt) {
         resetAccumulators();
         applyGravity();
 
