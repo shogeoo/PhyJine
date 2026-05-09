@@ -1,10 +1,14 @@
 package io.github.shogeo.phyjine.colliders;
 
+import io.github.shogeo.phyjine.Body;
 import io.github.shogeo.phyjine.Material;
 import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
 public abstract class Collider {
+
+    protected Body owner;
+
     protected Vector2D position;
     protected double angle;
 
@@ -44,4 +48,6 @@ public abstract class Collider {
     public AABB getAabb() {
         return aabb;
     }
+
+    public abstract void updateAabb(Vector2D bodyPosition, double bodyAngle);
 }

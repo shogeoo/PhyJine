@@ -26,15 +26,15 @@ public class Camera {
 
     public Point worldToScreen(Vector2D world, int screenW, int screenH) {
         double scale = UNITS_PER_METER * zoom;
-        int sx = (int) Math.round((world.getX() - position.getX()) * scale + screenW / 2.0);
-        int sy = (int) Math.round(-(world.getY() - position.getY()) * scale + screenH / 2.0);
+        int sx = (int) Math.round((world.x() - position.x()) * scale + screenW / 2.0);
+        int sy = (int) Math.round(-(world.y() - position.y()) * scale + screenH / 2.0);
         return new Point(sx, sy);
     }
 
     public Vector2D screenToWorld(Point screen, int screenW, int screenH) {
         double scale = UNITS_PER_METER * zoom;
-        double wx = (screen.x - screenW / 2.0) / scale + position.getX();
-        double wy = -(screen.y - screenH / 2.0) / scale + position.getY();
+        double wx = (screen.x - screenW / 2.0) / scale + position.x();
+        double wy = -(screen.y - screenH / 2.0) / scale + position.y();
         return new Vector2D(wx, wy);
     }
 
@@ -42,16 +42,15 @@ public class Camera {
         double scale = UNITS_PER_METER * zoom;
         double dx = screenDeltaX / scale;
         double dy = -screenDeltaY / scale;
-        position = new Vector2D(position.getX() - dx, position.getY() - dy);
+        position = new Vector2D(position.x() - dx, position.y() - dy);
     }
 
     public void zoom(double factor, Vector2D cursorWorld) {
         double oldZoom = zoom;
-        double newZoom = Math.max(0.01, Math.min(100.0, zoom * factor));
-        zoom = newZoom;
+        zoom = Math.clamp(zoom * factor, 0.01, 100.0);
         double ratio = oldZoom / zoom;
-        double newX = cursorWorld.getX() - (cursorWorld.getX() - position.getX()) * ratio;
-        double newY = cursorWorld.getY() - (cursorWorld.getY() - position.getY()) * ratio;
+        double newX = cursorWorld.x() - (cursorWorld.x() - position.x()) * ratio;
+        double newY = cursorWorld.y() - (cursorWorld.y() - position.y()) * ratio;
         position = new Vector2D(newX, newY);
     }
 }

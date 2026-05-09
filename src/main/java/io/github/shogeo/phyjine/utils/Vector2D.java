@@ -1,21 +1,6 @@
 package io.github.shogeo.phyjine.utils;
 
-public class Vector2D {
-    private final double x;
-    private final double y;
-
-    public Vector2D(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
+public record Vector2D(double x, double y) {
 
     public Vector2D add(Vector2D other) {
         return new Vector2D(this.x + other.x, this.y + other.y);
@@ -37,8 +22,10 @@ public class Vector2D {
         return x * x + y * y;
     }
 
-    @Override
-    public String toString() {
-        return "Vector2D(" + x + ", " + y + ")";
+    public Vector2D rotate(double angle) {
+        return new Vector2D(x * Math.cos(angle) - y * Math.sin(angle), x * Math.sin(angle) + y * Math.cos(angle));
     }
+
+    public double getX(){return x;}
+    public double getY(){return y;}
 }

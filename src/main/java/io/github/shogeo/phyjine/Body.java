@@ -1,12 +1,13 @@
 package io.github.shogeo.phyjine;
 
+import io.github.shogeo.phyjine.colliders.CircleCollider;
 import io.github.shogeo.phyjine.colliders.Collider;
 import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
 public class Body {
     private final Collider[] colliders;
-    private final AABB aabb;
+    private AABB aabb;
 
     private final Vector2D localCenterOfMass;
     private final double mass;
@@ -26,6 +27,8 @@ public class Body {
         this.angle = angle;
         this.colliders = colliders;
 
+        this.aabb = new AABB(position, position);
+
         this.mass = calculateMass();
         this.inverseMass = 1 / mass;
 
@@ -33,35 +36,12 @@ public class Body {
         this.momentOfInertia = calculateMomentOfInertia();
         this.inverseMomentOfInertia = 1 / momentOfInertia;
 
-        this.aabb = calculateAABB();
-
         this.velocity = new Vector2D(0, 0);
         this.force = new Vector2D(0, 0);
         this.angularVelocity = 0;
         this.torque = 0;
     }
 
-    private AABB calculateAABB() {
-        if (colliders.length == 0) {
-            return new AABB(new Vector2D(0, 0), new Vector2D(0, 0));
-        }
-
-        AABB firstAABB = colliders[0].getAabb();
-        double minX = firstAABB.min().getX();
-        double minY = firstAABB.min().getY();
-        double maxX = firstAABB.max().getX();
-        double maxY = firstAABB.max().getY();
-
-        for (int i = 1; i < colliders.length; i++) {
-            AABB colliderAABB = colliders[i].getAabb();
-            minX = Math.min(minX, colliderAABB.min().getX());
-            minY = Math.min(minY, colliderAABB.min().getY());
-            maxX = Math.max(maxX, colliderAABB.max().getX());
-            maxY = Math.max(maxY, colliderAABB.max().getY());
-        }
-
-        return new AABB(new Vector2D(minX, minY), new Vector2D(maxX, maxY));
-    }
 
 
     private double calculateMass() {
@@ -75,8 +55,8 @@ public class Body {
     private Vector2D calculateLocalCenterOfMass() {
         double xCOM = 0, yCOM = 0;
         for (Collider c : colliders) {
-            xCOM += c.getPosition().getX() * c.getMass();
-            yCOM += c.getPosition().getY() * c.getMass();
+            xCOM += c.getPosition().x() * c.getMass();
+            yCOM += c.getPosition().y() * c.getMass();
         }
         return new Vector2D(xCOM / mass, yCOM / mass);
     }
@@ -161,5 +141,29 @@ public class Body {
 
     public Vector2D getLocalCenterOfMass() {
         return localCenterOfMass;
+    }
+
+    public void updateAABB() {
+        if (colliders.length == 0) return;
+
+        for (Collider c : colliders) {
+            c.updateAabb(this.position, this.angle);
+        }
+
+        AABB first = colliders[0].getAabb();
+        double minX = first.getMin().getX();
+        double minY = first.getMin().getY();
+        double maxX = first.getMax().getX();
+        double maxY = first.getMax().getY();
+
+        for (int i = 1; i < colliders.length; i++) {
+            AABB cAabb = colliders[i].getAabb();
+            minX = Math.min(minX, cAabb.getMin().getX());
+            minY = Math.min(minY, cAabb.getMin().getY());
+            maxX = Math.max(maxX, cAabb.getMax().getX());
+            maxY = Math.max(maxY, cAabb.getMax().getY());
+        }
+
+        this.aabb = new AABB(new Vector2D(minX, minY), new Vector2D(maxX, maxY));
     }
 }

@@ -29,11 +29,16 @@ public class PhysicsWorld {
         resetAccumulators();
         applyGravity();
 
-        collisionDetector.detectCollisions(bodies);
-
         for (Body body : bodies) {
             body.integrate(dt);
         }
+
+        for (Body body : bodies) {
+            body.updateAABB();
+        }
+
+        collisionDetector.detectCollisions(bodies);
+
     }
 
     private void applyGravity() {

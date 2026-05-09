@@ -72,10 +72,10 @@ class RenderPanel extends JPanel {
         Vector2D topLeft = camera.screenToWorld(new Point(0, 0), w, h);
         Vector2D bottomRight = camera.screenToWorld(new Point(w, h), w, h);
 
-        double minX = Math.min(topLeft.getX(), bottomRight.getX());
-        double maxX = Math.max(topLeft.getX(), bottomRight.getX());
-        double minY = Math.min(topLeft.getY(), bottomRight.getY());
-        double maxY = Math.max(topLeft.getY(), bottomRight.getY());
+        double minX = Math.min(topLeft.x(), bottomRight.x());
+        double maxX = Math.max(topLeft.x(), bottomRight.x());
+        double minY = Math.min(topLeft.y(), bottomRight.y());
+        double maxY = Math.max(topLeft.y(), bottomRight.y());
 
         double startX = Math.floor(minX / worldSpacing) * worldSpacing;
         double startY = Math.floor(minY / worldSpacing) * worldSpacing;
@@ -108,8 +108,8 @@ class RenderPanel extends JPanel {
 
         double cosA = Math.cos(angle);
         double sinA = Math.sin(angle);
-        double comWorldX = bodyPos.getX() + localCom.getX() * cosA - localCom.getY() * sinA;
-        double comWorldY = bodyPos.getY() + localCom.getX() * sinA + localCom.getY() * cosA;
+        double comWorldX = bodyPos.x() + localCom.x() * cosA - localCom.y() * sinA;
+        double comWorldY = bodyPos.y() + localCom.x() * sinA + localCom.y() * cosA;
         Vector2D comWorld = new Vector2D(comWorldX, comWorldY);
 
         Point bodyScreen = camera.worldToScreen(bodyPos, w, h);
@@ -132,8 +132,8 @@ class RenderPanel extends JPanel {
 
         Vector2D localPos = collider.getPosition();
         Vector2D bodyPos = body.getPosition();
-        double worldX = bodyPos.getX() + localPos.getX() * cosA - localPos.getY() * sinA;
-        double worldY = bodyPos.getY() + localPos.getX() * sinA + localPos.getY() * cosA;
+        double worldX = bodyPos.x() + localPos.x() * cosA - localPos.y() * sinA;
+        double worldY = bodyPos.y() + localPos.x() * sinA + localPos.y() * cosA;
         Vector2D worldPos = new Vector2D(worldX, worldY);
 
         g.setColor(COLLIDER_COLOR);
@@ -146,8 +146,8 @@ class RenderPanel extends JPanel {
                 screenRadius * 2, screenRadius * 2);
         } else {
             var aabb = collider.getAabb();
-            Point min = camera.worldToScreen(aabb.min(), w, h);
-            Point max = camera.worldToScreen(aabb.max(), w, h);
+            Point min = camera.worldToScreen(aabb.getMin(), w, h);
+            Point max = camera.worldToScreen(aabb.getMax(), w, h);
             int rx = Math.min(min.x, max.x);
             int ry = Math.min(min.y, max.y);
             int rw = Math.abs(max.x - min.x);
