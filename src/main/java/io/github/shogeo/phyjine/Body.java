@@ -1,10 +1,12 @@
 package io.github.shogeo.phyjine;
 
 import io.github.shogeo.phyjine.colliders.Collider;
+import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
 public class Body {
     private final Collider[] colliders;
+    private final AABB aabb;
 
     private final Vector2D localCenterOfMass;
 
@@ -19,8 +21,6 @@ public class Body {
 
     private Vector2D velocity;
     private double angularVelocity;
-
-    private double angularAcceleration;
 
     private Vector2D force;
     private double torque;
@@ -37,11 +37,36 @@ public class Body {
         this.momentOfInertia = calculateMomentOfInertia();
         this.inverseMomentOfInertia = 1 / momentOfInertia;
 
+        this.aabb = calculateAABB();
+
         this.velocity = new Vector2D(0, 0);
         this.force = new Vector2D(0, 0);
         this.angularVelocity = 0;
         this.torque = 0;
     }
+
+    private AABB calculateAABB() {
+        if (colliders.length == 0) {
+            return new AABB(new Vector2D(0, 0), new Vector2D(0, 0));
+        }
+
+        AABB firstAABB = colliders[0].getAabb();
+        double minX = firstAABB.min().getX();
+        double minY = firstAABB.min().getY();
+        double maxX = firstAABB.max().getX();
+        double maxY = firstAABB.max().getY();
+
+        for (int i = 1; i < colliders.length; i++) {
+            AABB colliderAABB = colliders[i].getAabb();
+            minX = Math.min(minX, colliderAABB.min().getX());
+            minY = Math.min(minY, colliderAABB.min().getY());
+            maxX = Math.max(maxX, colliderAABB.max().getX());
+            maxY = Math.max(maxY, colliderAABB.max().getY());
+        }
+
+        return new AABB(new Vector2D(minX, minY), new Vector2D(maxX, maxY));
+    }
+
 
     private double calculateMass() {
         double totalMass = 0;
@@ -122,5 +147,13 @@ public class Body {
     }
     public double getAngularVelocity() {
         return angularVelocity;
+    }
+
+    public AABB getAabb() {
+        return aabb;
+    }
+
+    public Collider[] getColliders() {
+        return colliders;
     }
 }

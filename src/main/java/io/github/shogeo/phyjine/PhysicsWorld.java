@@ -8,11 +8,13 @@ import java.util.List;
 public class PhysicsWorld {
 
     private final double GRAVITY;
+    private final CollisionDetector collisionDetector;
 
     private final List<Body> bodies = new ArrayList<>();
 
     public PhysicsWorld(double GRAVITY) {
         this.GRAVITY = GRAVITY;
+        this.collisionDetector = new CollisionDetector();
     }
 
     void addBody(Body body) {
@@ -23,7 +25,7 @@ public class PhysicsWorld {
         resetAccumulators();
         applyGravity();
 
-
+        collisionDetector.detectCollisions(bodies);
 
         for (Body body : bodies) {
             body.integrate(dt);
@@ -32,7 +34,7 @@ public class PhysicsWorld {
 
     private void applyGravity() {
         for (Body body : bodies) {
-            body.applyForce(new Vector2D(0, GRAVITY*body.getMass()));;
+            body.applyForce(new Vector2D(0, GRAVITY*body.getMass()));
         }
     }
 
