@@ -25,11 +25,20 @@ public class Vector2D {
         return new Vector2D(this.x - other.x, this.y - other.y);
     }
 
+    public Vector2D multiply(double scalar) {
+        return new Vector2D(this.x * scalar, this.y * scalar);
+    }
+
     public double length() {
         return Math.sqrt(x * x + y * y);
     }
 
     public double lengthSquared() {
         return x * x + y * y;
+    }
+
+    @Override
+    public String toString() {
+        return "Vector2D(" + x + ", " + y + ")";
     }
 }

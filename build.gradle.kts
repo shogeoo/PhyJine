@@ -1,9 +1,14 @@
 plugins {
     id("java")
+    id("application")
 }
 
 group = "io.github.shogeo.phyjine"
 version = "0.0.0"
+
+application {
+    mainClass.set("io.github.shogeo.phyjine.Main")
+}
 
 repositories {
     mavenCentral()
