@@ -25,6 +25,10 @@ public abstract class Collider {
         return position;
     }
 
+    public void setPosition(Vector2D position) {
+        this.position = position;
+    }
+
     public double getAngle() {
         return angle;
     }
@@ -50,4 +54,8 @@ public abstract class Collider {
     }
 
     public abstract void updateAabb(Vector2D bodyPosition, double bodyAngle);
+
+    public void setOwner(Body owner) {
+        this.owner = owner;
+    }
 }

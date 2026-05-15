@@ -38,7 +38,6 @@ public class PhysicsWorld {
         }
 
         collisionDetector.detectCollisions(bodies);
-
     }
 
     private void applyGravity() {

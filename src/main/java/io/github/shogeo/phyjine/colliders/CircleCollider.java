@@ -9,8 +9,7 @@ public class CircleCollider extends Collider {
 
     private final double radius;
 
-    public CircleCollider(Body owner, Vector2D position, double angle, double radius, Material material) {
-        this.owner = owner;
+    public CircleCollider(Vector2D position, double angle, double radius, Material material) {
         this.position = position;
         this.angle = angle;
         this.radius = radius;

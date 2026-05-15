@@ -3,6 +3,7 @@ package io.github.shogeo.phyjine.renderer;
 import io.github.shogeo.phyjine.Body;
 import io.github.shogeo.phyjine.colliders.CircleCollider;
 import io.github.shogeo.phyjine.colliders.Collider;
+import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
 import javax.swing.JPanel;
@@ -19,8 +20,9 @@ class RenderPanel extends JPanel {
     private static final Color GRID_COLOR = new Color(40, 40, 40);
     private static final Color AXIS_COLOR = new Color(100, 100, 100);
     private static final Color COLLIDER_COLOR = new Color(0, 255, 0);
-    private static final Color BODY_CENTER_COLOR = Color.WHITE;
     private static final Color COM_COLOR = Color.YELLOW;
+    private static final Color BODY_AABB_COLOR = new Color(128, 0, 128); // Пурпурный
+    private static final Color COLLIDER_AABB_COLOR = Color.GRAY;
 
     private static final double[] NICE_SPACINGS = {
         0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
@@ -101,21 +103,24 @@ class RenderPanel extends JPanel {
         g.setStroke(new BasicStroke(1.0f));
     }
 
+    private void drawAABB(Graphics2D g, AABB aabb, int w, int h) {
+        if (aabb == null) return;
+        Point min = camera.worldToScreen(aabb.getMin(), w, h);
+        Point max = camera.worldToScreen(aabb.getMax(), w, h);
+        int rx = Math.min(min.x, max.x);
+        int ry = Math.min(min.y, max.y);
+        int rw = Math.abs(max.x - min.x);
+        int rh = Math.abs(max.y - min.y);
+        g.drawRect(rx, ry, rw, rh);
+    }
+
     private void drawBody(Graphics2D g, Body body, int w, int h) {
-        Vector2D bodyPos = body.getPosition();
-        double angle = body.getAngle();
-        Vector2D localCom = body.getLocalCenterOfMass();
+        // Рисуем AABB тела
+        g.setColor(BODY_AABB_COLOR);
+        drawAABB(g, body.getAabb(), w, h);
 
-        double cosA = Math.cos(angle);
-        double sinA = Math.sin(angle);
-        double comWorldX = bodyPos.x() + localCom.x() * cosA - localCom.y() * sinA;
-        double comWorldY = bodyPos.y() + localCom.x() * sinA + localCom.y() * cosA;
-        Vector2D comWorld = new Vector2D(comWorldX, comWorldY);
-
-        Point bodyScreen = camera.worldToScreen(bodyPos, w, h);
-        g.setColor(BODY_CENTER_COLOR);
-        g.fillOval(bodyScreen.x - 4, bodyScreen.y - 4, 8, 8);
-
+        // Рисуем центр масс
+        Vector2D comWorld = body.getPosition();
         Point comScreen = camera.worldToScreen(comWorld, w, h);
         g.setColor(COM_COLOR);
         g.fillOval(comScreen.x - 5, comScreen.y - 5, 10, 10);
@@ -126,15 +131,14 @@ class RenderPanel extends JPanel {
     }
 
     private void drawCollider(Graphics2D g, Collider collider, Body body, int w, int h) {
-        double angle = body.getAngle();
-        double cosA = Math.cos(angle);
-        double sinA = Math.sin(angle);
+        // Рисуем AABB коллайдера
+        g.setColor(COLLIDER_AABB_COLOR);
+        drawAABB(g, collider.getAabb(), w, h);
 
+        // Рисуем сам коллайдер
         Vector2D localPos = collider.getPosition();
-        Vector2D bodyPos = body.getPosition();
-        double worldX = bodyPos.x() + localPos.x() * cosA - localPos.y() * sinA;
-        double worldY = bodyPos.y() + localPos.x() * sinA + localPos.y() * cosA;
-        Vector2D worldPos = new Vector2D(worldX, worldY);
+        Vector2D rotatedOffset = localPos.rotate(body.getAngle());
+        Vector2D worldPos = body.getPosition().add(rotatedOffset);
 
         g.setColor(COLLIDER_COLOR);
 
@@ -145,14 +149,9 @@ class RenderPanel extends JPanel {
             g.drawOval(center.x - screenRadius, center.y - screenRadius,
                 screenRadius * 2, screenRadius * 2);
         } else {
-            var aabb = collider.getAabb();
-            Point min = camera.worldToScreen(aabb.getMin(), w, h);
-            Point max = camera.worldToScreen(aabb.getMax(), w, h);
-            int rx = Math.min(min.x, max.x);
-            int ry = Math.min(min.y, max.y);
-            int rw = Math.abs(max.x - min.x);
-            int rh = Math.abs(max.y - min.y);
-            g.drawRect(rx, ry, rw, rh);
+            // Для не-круговых коллайдеров можно нарисовать их AABB еще раз, но другим цветом,
+            // или реализовать более сложную отрисовку полигонов.
+            // Пока что AABB уже нарисован выше.
         }
     }
 }

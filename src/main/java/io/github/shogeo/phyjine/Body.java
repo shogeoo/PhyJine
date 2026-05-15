@@ -1,6 +1,5 @@
 package io.github.shogeo.phyjine;
 
-import io.github.shogeo.phyjine.colliders.CircleCollider;
 import io.github.shogeo.phyjine.colliders.Collider;
 import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
@@ -9,7 +8,6 @@ public class Body {
     private final Collider[] colliders;
     private AABB aabb;
 
-    private final Vector2D localCenterOfMass;
     private final double mass;
     private final double momentOfInertia;
     private final double inverseMass;
@@ -27,14 +25,25 @@ public class Body {
         this.angle = angle;
         this.colliders = colliders;
 
+        for (Collider c : colliders) {
+            c.setOwner(this);
+        }
+
         this.aabb = new AABB(position, position);
 
         this.mass = calculateMass();
-        this.inverseMass = 1 / mass;
+        this.inverseMass = this.mass > 0 ? 1 / mass : 0;
 
-        this.localCenterOfMass = calculateLocalCenterOfMass();
+        Vector2D localCenterOfMass = calculateLocalCenterOfMass();
+
+        this.position = this.position.add(localCenterOfMass.rotate(this.angle));
+
+        for (Collider c : colliders) {
+            c.setPosition(c.getPosition().subtract(localCenterOfMass));
+        }
+
         this.momentOfInertia = calculateMomentOfInertia();
-        this.inverseMomentOfInertia = 1 / momentOfInertia;
+        this.inverseMomentOfInertia = this.momentOfInertia > 0 ? 1 / momentOfInertia : 0;
 
         this.velocity = new Vector2D(0, 0);
         this.force = new Vector2D(0, 0);
@@ -53,6 +62,9 @@ public class Body {
     }
 
     private Vector2D calculateLocalCenterOfMass() {
+        if (mass == 0) {
+            return new Vector2D(0, 0);
+        }
         double xCOM = 0, yCOM = 0;
         for (Collider c : colliders) {
             xCOM += c.getPosition().x() * c.getMass();
@@ -64,8 +76,7 @@ public class Body {
     private double calculateMomentOfInertia() {
         double totalMomentOfInertia = 0;
         for (Collider c : colliders) {
-            Vector2D positionOfColliderFromCOM = c.getPosition().subtract(localCenterOfMass);
-            double distance2 = positionOfColliderFromCOM.lengthSquared();
+            double distance2 = c.getPosition().lengthSquared();
             totalMomentOfInertia += c.getMomentOfInertia() + c.getMass() * distance2;
         }
         return totalMomentOfInertia;
@@ -137,10 +148,6 @@ public class Body {
 
     public Collider[] getColliders() {
         return colliders;
-    }
-
-    public Vector2D getLocalCenterOfMass() {
-        return localCenterOfMass;
     }
 
     public void updateAABB() {
