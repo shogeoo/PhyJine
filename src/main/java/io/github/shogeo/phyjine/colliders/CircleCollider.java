@@ -30,8 +30,8 @@ public class CircleCollider extends Collider {
 
         Vector2D globalPosition = bodyPosition.add(rotatedOffset);
 
-        Vector2D min = new Vector2D(globalPosition.getX() - radius, globalPosition.getY() - radius);
-        Vector2D max = new Vector2D(globalPosition.getX() + radius, globalPosition.getY() + radius);
+        Vector2D min = new Vector2D(globalPosition.x() - radius, globalPosition.y() - radius);
+        Vector2D max = new Vector2D(globalPosition.x() + radius, globalPosition.y() + radius);
 
         this.aabb = new AABB(min, max);
     }

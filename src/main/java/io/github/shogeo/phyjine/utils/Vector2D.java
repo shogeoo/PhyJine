@@ -25,12 +25,4 @@ public record Vector2D(double x, double y) {
     public Vector2D rotate(double angle) {
         return new Vector2D(x * Math.cos(angle) - y * Math.sin(angle), x * Math.sin(angle) + y * Math.cos(angle));
     }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
 }

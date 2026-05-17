@@ -97,8 +97,8 @@ class RenderPanel extends JPanel {
 
     private void drawAABB(Graphics2D g, AABB aabb, int w, int h) {
         if (aabb == null) return;
-        Point min = camera.worldToScreen(aabb.getMin(), w, h);
-        Point max = camera.worldToScreen(aabb.getMax(), w, h);
+        Point min = camera.worldToScreen(aabb.min(), w, h);
+        Point max = camera.worldToScreen(aabb.max(), w, h);
         int rx = Math.min(min.x, max.x);
         int ry = Math.min(min.y, max.y);
         int rw = Math.abs(max.x - min.x);

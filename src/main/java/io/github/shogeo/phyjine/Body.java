@@ -28,8 +28,6 @@ public class Body {
             c.setOwner(this);
         }
 
-        this.aabb = new AABB(position, position);
-
         this.mass = calculateMass();
         this.inverseMass = this.mass > 0 ? 1 / mass : 0;
 
@@ -48,6 +46,8 @@ public class Body {
         this.force = new Vector2D(0, 0);
         this.angularVelocity = 0;
         this.torque = 0;
+
+        this.updateAABB();
     }
 
 
@@ -81,14 +81,17 @@ public class Body {
     }
 
     void integrate(double dt) {
+
+        if (inverseMass == 0) return;
+
         Vector2D acceleration = force.multiply(inverseMass);
         double angularAcceleration = torque * inverseMomentOfInertia;
 
-        position = (position.add(velocity.multiply(dt))).add(acceleration.multiply(0.5 * dt * dt));
-        angle = angle + (angularVelocity * dt) + (0.5 * angularAcceleration * dt * dt);
-
         velocity = velocity.add(acceleration.multiply(dt));
         angularVelocity = angularVelocity + (angularAcceleration * dt);
+
+        position = position.add(velocity.multiply(dt));
+        angle += angularVelocity * dt;
     }
 
     void applyForce(Vector2D force) {
@@ -156,17 +159,17 @@ public class Body {
         }
 
         AABB first = colliders[0].getAabb();
-        double minX = first.getMin().getX();
-        double minY = first.getMin().getY();
-        double maxX = first.getMax().getX();
-        double maxY = first.getMax().getY();
+        double minX = first.min().x();
+        double minY = first.min().y();
+        double maxX = first.max().x();
+        double maxY = first.max().y();
 
         for (int i = 1; i < colliders.length; i++) {
             AABB cAabb = colliders[i].getAabb();
-            minX = Math.min(minX, cAabb.getMin().getX());
-            minY = Math.min(minY, cAabb.getMin().getY());
-            maxX = Math.max(maxX, cAabb.getMax().getX());
-            maxY = Math.max(maxY, cAabb.getMax().getY());
+            minX = Math.min(minX, cAabb.min().x());
+            minY = Math.min(minY, cAabb.min().y());
+            maxX = Math.max(maxX, cAabb.max().x());
+            maxY = Math.max(maxY, cAabb.max().y());
         }
 
         this.aabb = new AABB(new Vector2D(minX, minY), new Vector2D(maxX, maxY));
