@@ -55,11 +55,15 @@ public abstract class Collider {
 
     public abstract void updateAabb(Vector2D bodyPosition, double bodyAngle);
 
+    public Body getOwner() {
+        return owner;
+    }
+
     public void setOwner(Body owner) {
         this.owner = owner;
     }
 
-    public int getType(){
+    public int getType() {
         return 0;
     }
 }

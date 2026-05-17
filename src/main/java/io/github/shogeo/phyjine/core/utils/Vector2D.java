@@ -25,4 +25,9 @@ public record Vector2D(double x, double y) {
     public Vector2D rotate(double angle) {
         return new Vector2D(x * Math.cos(angle) - y * Math.sin(angle), x * Math.sin(angle) + y * Math.cos(angle));
     }
+
+    public Vector2D normalized() {
+        double len = length();
+        return new Vector2D(x / len, y / len);
+    }
 }

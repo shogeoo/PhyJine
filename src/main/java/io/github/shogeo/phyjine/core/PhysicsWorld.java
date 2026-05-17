@@ -8,13 +8,16 @@ import java.util.List;
 public class PhysicsWorld {
 
     private final double gravity;
+
     private final CollisionDetector collisionDetector;
+    private final CollisionSolver collisionSolver;
 
     private final List<Body> bodies = new ArrayList<>();
 
     public PhysicsWorld(double gravity) {
         this.gravity = gravity;
         this.collisionDetector = new CollisionDetector();
+        this.collisionSolver = new CollisionSolver();
     }
 
     public void addBody(Body body) {
@@ -30,14 +33,16 @@ public class PhysicsWorld {
         applyGravity();
 
         for (Body body : bodies) {
-            body.integrate(dt);
-        }
-
-        for (Body body : bodies) {
             body.updateAABB();
         }
 
         collisionDetector.detectCollisions(bodies);
+
+        collisionSolver.solve(collisionDetector.getCollisions());
+
+        for (Body body : bodies) {
+            body.integrate(dt);
+        }
     }
 
     private void applyGravity() {

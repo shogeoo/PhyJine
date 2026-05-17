@@ -119,7 +119,7 @@ public class Body {
         return momentOfInertia;
     }
 
-    public double getInverseMass() {
+    public double getInvMass() {
         return inverseMass;
     }
 
@@ -141,6 +141,10 @@ public class Body {
 
     public Vector2D getVelocity() {
         return velocity;
+    }
+
+    public void setVelocity(Vector2D velocity) {
+        this.velocity = velocity;
     }
 
     public double getAngularVelocity() {
@@ -177,5 +181,9 @@ public class Body {
         }
 
         this.aabb = new AABB(new Vector2D(minX, minY), new Vector2D(maxX, maxY));
+    }
+
+    public void setPosition(Vector2D newPos) {
+        this.position = newPos;
     }
 }
