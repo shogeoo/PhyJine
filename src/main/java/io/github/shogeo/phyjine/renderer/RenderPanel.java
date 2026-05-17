@@ -6,13 +6,8 @@ import io.github.shogeo.phyjine.colliders.Collider;
 import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
-import javax.swing.JPanel;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 class RenderPanel extends JPanel {
@@ -24,10 +19,7 @@ class RenderPanel extends JPanel {
     private static final Color BODY_AABB_COLOR = new Color(128, 0, 128); // Пурпурный
     private static final Color COLLIDER_AABB_COLOR = Color.GRAY;
 
-    private static final double[] NICE_SPACINGS = {
-        0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
-        0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000
-    };
+    private static final double[] NICE_SPACINGS = {0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000};
 
     private final Camera camera;
     private List<Body> bodies = List.of();
@@ -146,8 +138,7 @@ class RenderPanel extends JPanel {
             double scale = camera.getZoom() * Camera.UNITS_PER_METER;
             int screenRadius = (int) Math.round(c.getRadius() * scale);
             Point center = camera.worldToScreen(worldPos, w, h);
-            g.drawOval(center.x - screenRadius, center.y - screenRadius,
-                screenRadius * 2, screenRadius * 2);
+            g.drawOval(center.x - screenRadius, center.y - screenRadius, screenRadius * 2, screenRadius * 2);
         } else {
             // Для не-круговых коллайдеров можно нарисовать их AABB еще раз, но другим цветом,
             // или реализовать более сложную отрисовку полигонов.

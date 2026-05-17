@@ -2,7 +2,7 @@ package io.github.shogeo.phyjine.renderer;
 
 import io.github.shogeo.phyjine.utils.Vector2D;
 
-import java.awt.Point;
+import java.awt.*;
 
 public class Camera {
 

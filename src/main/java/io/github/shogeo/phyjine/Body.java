@@ -6,12 +6,11 @@ import io.github.shogeo.phyjine.utils.Vector2D;
 
 public class Body {
     private final Collider[] colliders;
-    private AABB aabb;
-
     private final double mass;
     private final double momentOfInertia;
     private final double inverseMass;
     private final double inverseMomentOfInertia;
+    private AABB aabb;
     private Vector2D position;
     private double angle;
     private Vector2D velocity;
@@ -50,7 +49,6 @@ public class Body {
         this.angularVelocity = 0;
         this.torque = 0;
     }
-
 
 
     private double calculateMass() {

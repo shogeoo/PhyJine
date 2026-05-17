@@ -42,7 +42,7 @@ public class PhysicsWorld {
 
     private void applyGravity() {
         for (Body body : bodies) {
-            body.applyForce(new Vector2D(0, GRAVITY*body.getMass()));
+            body.applyForce(new Vector2D(0, GRAVITY * body.getMass()));
         }
     }
 

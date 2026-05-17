@@ -3,9 +3,8 @@ package io.github.shogeo.phyjine.renderer;
 import io.github.shogeo.phyjine.Body;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -70,10 +69,7 @@ public class RenderWindow {
         });
 
         panel.addMouseWheelListener(e -> {
-            Vector2D cursorWorld = camera.screenToWorld(
-                new Point(e.getX(), e.getY()),
-                panel.getWidth(), panel.getHeight()
-            );
+            Vector2D cursorWorld = camera.screenToWorld(new Point(e.getX(), e.getY()), panel.getWidth(), panel.getHeight());
             double factor = e.getWheelRotation() < 0 ? 1.1 : 0.9;
             camera.zoom(factor, cursorWorld);
         });

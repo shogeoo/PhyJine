@@ -5,7 +5,7 @@ import io.github.shogeo.phyjine.renderer.Camera;
 import io.github.shogeo.phyjine.renderer.RenderWindow;
 import io.github.shogeo.phyjine.utils.Vector2D;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 public class Main {
     static void main() {

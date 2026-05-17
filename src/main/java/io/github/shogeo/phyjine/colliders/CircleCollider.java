@@ -1,6 +1,5 @@
 package io.github.shogeo.phyjine.colliders;
 
-import io.github.shogeo.phyjine.Body;
 import io.github.shogeo.phyjine.Material;
 import io.github.shogeo.phyjine.utils.AABB;
 import io.github.shogeo.phyjine.utils.Vector2D;
@@ -15,7 +14,7 @@ public class CircleCollider extends Collider {
         this.radius = radius;
         this.material = material;
 
-        this.mass = Math.PI * radius * radius * material.getDensity();
+        this.mass = Math.PI * radius * radius * material.density();
 
         this.inverseMass = 1 / mass;
 
@@ -25,6 +24,7 @@ public class CircleCollider extends Collider {
     public double getRadius() {
         return radius;
     }
+
     public void updateAabb(Vector2D bodyPosition, double bodyAngle) {
         Vector2D rotatedOffset = this.position.rotate(bodyAngle);
 
