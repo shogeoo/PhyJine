@@ -1,7 +1,7 @@
 package io.github.shogeo.phyjine.renderer;
 
-import io.github.shogeo.phyjine.Body;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.Body;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;

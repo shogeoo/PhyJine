@@ -1,6 +1,6 @@
 package io.github.shogeo.phyjine.renderer;
 
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import java.awt.*;
 
@@ -13,7 +13,7 @@ public class Camera {
 
     public Camera() {
         this.position = new Vector2D(0, 0);
-        this.zoom = 0.5;
+        this.zoom = 1;
     }
 
     public Vector2D getPosition() {

@@ -1,4 +1,4 @@
-package io.github.shogeo.phyjine.utils;
+package io.github.shogeo.phyjine.core.utils;
 
 public record AABB(Vector2D min, Vector2D max) {
 

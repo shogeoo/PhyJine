@@ -1,6 +1,6 @@
-package io.github.shogeo.phyjine;
+package io.github.shogeo.phyjine.core;
 
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;

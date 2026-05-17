@@ -1,8 +1,8 @@
-package io.github.shogeo.phyjine;
+package io.github.shogeo.phyjine.core;
 
-import io.github.shogeo.phyjine.colliders.Collider;
-import io.github.shogeo.phyjine.utils.AABB;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.colliders.Collider;
+import io.github.shogeo.phyjine.core.utils.AABB;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 public class Body {
     private final Collider[] colliders;
@@ -133,6 +133,10 @@ public class Body {
 
     public double getAngle() {
         return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
     }
 
     public Vector2D getVelocity() {

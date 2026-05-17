@@ -1,9 +1,9 @@
-package io.github.shogeo.phyjine.colliders;
+package io.github.shogeo.phyjine.core.colliders;
 
-import io.github.shogeo.phyjine.Body;
-import io.github.shogeo.phyjine.Material;
-import io.github.shogeo.phyjine.utils.AABB;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.Body;
+import io.github.shogeo.phyjine.core.Material;
+import io.github.shogeo.phyjine.core.utils.AABB;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 public abstract class Collider {
 
@@ -57,5 +57,9 @@ public abstract class Collider {
 
     public void setOwner(Body owner) {
         this.owner = owner;
+    }
+
+    public int getType(){
+        return 0;
     }
 }

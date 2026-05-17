@@ -1,15 +1,18 @@
 package io.github.shogeo.phyjine;
 
-import io.github.shogeo.phyjine.colliders.CircleCollider;
+import io.github.shogeo.phyjine.core.colliders.CircleCollider;
+import io.github.shogeo.phyjine.core.Body;
+import io.github.shogeo.phyjine.core.Material;
+import io.github.shogeo.phyjine.core.PhysicsWorld;
 import io.github.shogeo.phyjine.renderer.Camera;
 import io.github.shogeo.phyjine.renderer.RenderWindow;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import javax.swing.*;
 
 public class Main {
     static void main() {
-        PhysicsWorld world = new PhysicsWorld(0);
+        PhysicsWorld world = new PhysicsWorld(-9.81);
 
         Camera camera = new Camera();
         RenderWindow window = new RenderWindow("PhyJine", camera);

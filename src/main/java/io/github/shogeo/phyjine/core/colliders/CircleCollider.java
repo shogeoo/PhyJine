@@ -1,8 +1,8 @@
-package io.github.shogeo.phyjine.colliders;
+package io.github.shogeo.phyjine.core.colliders;
 
-import io.github.shogeo.phyjine.Material;
-import io.github.shogeo.phyjine.utils.AABB;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.Material;
+import io.github.shogeo.phyjine.core.utils.AABB;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 public class CircleCollider extends Collider {
 
@@ -34,5 +34,9 @@ public class CircleCollider extends Collider {
         Vector2D max = new Vector2D(globalPosition.x() + radius, globalPosition.y() + radius);
 
         this.aabb = new AABB(min, max);
+    }
+
+    public int getType(){
+        return 1;
     }
 }

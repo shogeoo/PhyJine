@@ -1,4 +1,4 @@
-package io.github.shogeo.phyjine.utils;
+package io.github.shogeo.phyjine.core.utils;
 
 public record Vector2D(double x, double y) {
 

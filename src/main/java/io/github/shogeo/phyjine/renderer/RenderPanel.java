@@ -1,10 +1,10 @@
 package io.github.shogeo.phyjine.renderer;
 
-import io.github.shogeo.phyjine.Body;
-import io.github.shogeo.phyjine.colliders.CircleCollider;
-import io.github.shogeo.phyjine.colliders.Collider;
-import io.github.shogeo.phyjine.utils.AABB;
-import io.github.shogeo.phyjine.utils.Vector2D;
+import io.github.shogeo.phyjine.core.Body;
+import io.github.shogeo.phyjine.core.colliders.CircleCollider;
+import io.github.shogeo.phyjine.core.colliders.Collider;
+import io.github.shogeo.phyjine.core.utils.AABB;
+import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
@@ -127,10 +127,11 @@ class RenderPanel extends JPanel {
         g.setColor(COLLIDER_AABB_COLOR);
         drawAABB(g, collider.getAabb(), w, h);
 
-        // Рисуем сам коллайдер
+        // Вычисляем мировую позицию и угол
         Vector2D localPos = collider.getPosition();
         Vector2D rotatedOffset = localPos.rotate(body.getAngle());
         Vector2D worldPos = body.getPosition().add(rotatedOffset);
+        double worldAngle = body.getAngle() + collider.getAngle();
 
         g.setColor(COLLIDER_COLOR);
 
@@ -138,7 +139,16 @@ class RenderPanel extends JPanel {
             double scale = camera.getZoom() * Camera.UNITS_PER_METER;
             int screenRadius = (int) Math.round(c.getRadius() * scale);
             Point center = camera.worldToScreen(worldPos, w, h);
+
+            // Рисуем окружность
             g.drawOval(center.x - screenRadius, center.y - screenRadius, screenRadius * 2, screenRadius * 2);
+
+            // Рисуем линию, показывающую ориентацию
+            Vector2D direction = new Vector2D(c.getRadius(), 0).rotate(worldAngle);
+            Vector2D lineEndWorld = worldPos.add(direction);
+            Point lineEndScreen = camera.worldToScreen(lineEndWorld, w, h);
+            g.drawLine(center.x, center.y, lineEndScreen.x, lineEndScreen.y);
+
         } else {
             // Для не-круговых коллайдеров можно нарисовать их AABB еще раз, но другим цветом,
             // или реализовать более сложную отрисовку полигонов.

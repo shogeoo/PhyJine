@@ -1,6 +1,6 @@
-package io.github.shogeo.phyjine;
+package io.github.shogeo.phyjine.core;
 
-import io.github.shogeo.phyjine.colliders.Collider;
+import io.github.shogeo.phyjine.core.colliders.Collider;
 
 import java.util.List;
 
