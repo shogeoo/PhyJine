@@ -14,6 +14,14 @@ public record Vector2D(double x, double y) {
         return new Vector2D(this.x * scalar, this.y * scalar);
     }
 
+    public double dot(Vector2D other) {
+        return this.x * other.x + this.y * other.y;
+    }
+
+    public double cross(Vector2D other) {
+        return this.x * other.y - this.y * other.x;
+    }
+
     public double length() {
         return Math.sqrt(x * x + y * y);
     }

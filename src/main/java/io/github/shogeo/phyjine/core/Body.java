@@ -97,7 +97,6 @@ public class Body {
     void applyForce(Vector2D force) {
         this.force = this.force.add(force);
     }
-
     void applyTorque(double torque) {
         this.torque += torque;
     }
@@ -105,7 +104,6 @@ public class Body {
     void resetForce() {
         this.force = new Vector2D(0, 0);
     }
-
     void resetTorque() {
         this.torque = 0;
     }
@@ -114,11 +112,6 @@ public class Body {
     double getMass() {
         return mass;
     }
-
-    double getMomentOfInertia() {
-        return momentOfInertia;
-    }
-
     public double getInvMass() {
         return inverseMass;
     }
@@ -130,11 +123,13 @@ public class Body {
     public Vector2D getPosition() {
         return position;
     }
-
     public double getAngle() {
         return angle;
     }
 
+    public void setPosition(Vector2D newPos) {
+        this.position = newPos;
+    }
     public void setAngle(double angle) {
         this.angle = angle;
     }
@@ -142,13 +137,15 @@ public class Body {
     public Vector2D getVelocity() {
         return velocity;
     }
-
     public void setVelocity(Vector2D velocity) {
         this.velocity = velocity;
     }
 
     public double getAngularVelocity() {
         return angularVelocity;
+    }
+    public void setAngularVelocity(double v) {
+        this.angularVelocity = v;
     }
 
     public AABB getAabb() {
@@ -181,9 +178,5 @@ public class Body {
         }
 
         this.aabb = new AABB(new Vector2D(minX, minY), new Vector2D(maxX, maxY));
-    }
-
-    public void setPosition(Vector2D newPos) {
-        this.position = newPos;
     }
 }
