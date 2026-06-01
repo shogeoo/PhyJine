@@ -19,17 +19,14 @@ public class CollisionSolver {
         Body body1 = c.a().getOwner();
         Body body2 = c.b().getOwner();
 
-        double totalMass = body1.getMass() + body2.getMass();
+        double totalInvMass = body1.getInvMass() + body2.getInvMass();
+        if (totalInvMass <= 0.0) return;
 
-        double magnitude = c.penetration() * totalMass;
-
+        double magnitude = Math.max(c.penetration(), 0.0) / totalInvMass;
         Vector2D separationVector = c.normal().multiply(magnitude);
 
-        Vector2D newPos1 = body1.getPosition().subtract(separationVector.multiply(body1.getInvMass()));
-        body1.setPosition(newPos1);
-
-        Vector2D newPos2 = body2.getPosition().add(separationVector.multiply(body2.getInvMass()));
-        body2.setPosition(newPos2);
+        body1.setPosition(body1.getPosition().subtract(separationVector.multiply(body1.getInvMass())));
+        body2.setPosition(body2.getPosition().add(separationVector.multiply(body2.getInvMass())));
     }
 
     private void resolveVelocities(CollisionManifold c) {
