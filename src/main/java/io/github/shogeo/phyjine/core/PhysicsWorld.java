@@ -7,15 +7,15 @@ import java.util.List;
 
 public class PhysicsWorld {
 
-    private final double gravity;
+    private final double GRAVITY;
 
     private final CollisionDetector collisionDetector;
     private final CollisionSolver collisionSolver;
 
     private final List<Body> bodies = new ArrayList<>();
 
-    public PhysicsWorld(double gravity) {
-        this.gravity = gravity;
+    public PhysicsWorld(double GRAVITY) {
+        this.GRAVITY = GRAVITY;
         this.collisionDetector = new CollisionDetector();
         this.collisionSolver = new CollisionSolver();
     }
@@ -47,7 +47,7 @@ public class PhysicsWorld {
 
     private void applyGravity() {
         for (Body body : bodies) {
-            body.applyForce(new Vector2D(0, gravity * body.getMass()));
+            body.applyForce(new Vector2D(0, GRAVITY * body.getMass()));
         }
     }
 
