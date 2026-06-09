@@ -23,6 +23,6 @@ public class Renderer implements Runnable {
 
         frame.setVisible(true);
 
-        new Timer(16, e -> panel.repaint()).start();
+        panel.start();
     }
 }

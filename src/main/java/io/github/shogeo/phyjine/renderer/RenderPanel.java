@@ -4,10 +4,10 @@ import io.github.shogeo.phyjine.core.Body;
 import io.github.shogeo.phyjine.core.PhysicsWorld;
 import io.github.shogeo.phyjine.core.colliders.CircleCollider;
 import io.github.shogeo.phyjine.core.colliders.Collider;
+import io.github.shogeo.phyjine.core.colliders.PolygonCollider;
 import io.github.shogeo.phyjine.core.utils.AABB;
 import io.github.shogeo.phyjine.core.utils.Vector2D;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -16,21 +16,22 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RenderPanel extends JPanel {
+public class RenderPanel extends Canvas implements Runnable {
 
     private static final double UNITS_PER_METER = 100.0;
 
     private final PhysicsWorld world;
     private final Camera camera;
-    // Pre-allocated objects for drawing to reduce garbage collection
     private final Line2D.Double line = new Line2D.Double();
     private final Rectangle2D.Double rect = new Rectangle2D.Double();
     private final Ellipse2D.Double ellipse = new Ellipse2D.Double();
     private Point lastMousePos;
     private final boolean renderAABBs = false;
+    private volatile boolean running = true;
 
     public RenderPanel(PhysicsWorld world) {
         this.world = world;
@@ -47,7 +48,7 @@ public class RenderPanel extends JPanel {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (lastMousePos != null && SwingUtilities.isRightMouseButton(e)) {
+                if (lastMousePos != null && javax.swing.SwingUtilities.isRightMouseButton(e)) {
                     int dx = e.getX() - lastMousePos.x;
                     int dy = e.getY() - lastMousePos.y;
                     camera.pan(dx, dy);
@@ -74,41 +75,100 @@ public class RenderPanel extends JPanel {
         addMouseWheelListener(mouseAdapter);
     }
 
+    public void start() {
+        new Thread(this, "RenderThread").start();
+    }
+
+    public void stop() {
+        running = false;
+    }
+
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+    public void run() {
+        createBufferStrategy(2);
+        BufferStrategy bs = getBufferStrategy();
 
-        if (!camera.isInitialized()) {
-            camera.initialize(getWidth(), getHeight());
+        while (running) {
+            long startTime = System.nanoTime();
+
+            render(bs);
+
+            long elapsed = System.nanoTime() - startTime;
+            long targetDelay = 8_333_333L; // 120 FPS target
+            if (elapsed < targetDelay) {
+                long sleepMs = (targetDelay - elapsed) / 1_000_000L;
+                int sleepNs = (int) ((targetDelay - elapsed) % 1_000_000L);
+                try {
+                    Thread.sleep(sleepMs, sleepNs);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            } else {
+                Thread.yield();
+            }
         }
+    }
 
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    private void render(BufferStrategy bs) {
+        do {
+            do {
+                Graphics2D g2d = (Graphics2D) bs.getDrawGraphics();
+                if (g2d == null) return;
+                try {
+                    g2d.setColor(getBackground());
+                    g2d.fillRect(0, 0, getWidth(), getHeight());
 
-        AffineTransform savedTransform = g2d.getTransform();
+                    if (!camera.isInitialized()) {
+                        camera.initialize(getWidth(), getHeight());
+                    }
 
-        g2d.transform(camera.getTransform());
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2d.setStroke(new BasicStroke(1.0f / (float) camera.getScale()));
+                    AffineTransform savedTransform = g2d.getTransform();
 
-        drawGridAndAxes(g2d);
-        drawWorld(g2d);
+                    g2d.transform(camera.getTransform());
 
-        g2d.setTransform(savedTransform);
+                    g2d.setStroke(new BasicStroke(1.0f / (float) camera.getScale()));
+
+                    drawGridAndAxes(g2d);
+                    drawWorld(g2d);
+
+                    g2d.setTransform(savedTransform);
+                }
+                finally {
+                    g2d.dispose();
+                }
+            } while (bs.contentsRestored());
+            bs.show();
+        } while (bs.contentsLost());
     }
 
     private void drawGridAndAxes(Graphics2D g2d) {
-        Rectangle clipBounds = g2d.getClipBounds();
-        if (clipBounds == null) return;
+        double startX = 0;
+        double startY = 0;
+        double endX = getWidth();
+        double endY = getHeight();
 
-        double startX = clipBounds.getX();
-        double startY = clipBounds.getY();
-        double endX = startX + clipBounds.getWidth();
-        double endY = startY + clipBounds.getHeight();
+        AffineTransform inverse;
+        try {
+            inverse = camera.getTransform().createInverse();
+            java.awt.geom.Point2D minWorld = inverse.transform(new java.awt.geom.Point2D.Double(0, getHeight()), null);
+            java.awt.geom.Point2D maxWorld = inverse.transform(new java.awt.geom.Point2D.Double(getWidth(), 0), null);
+            startX = minWorld.getX();
+            startY = minWorld.getY();
+            endX = maxWorld.getX();
+            endY = maxWorld.getY();
+        } catch (Exception e) {
+            startX = -getWidth() * 2;
+            startY = -getHeight() * 2;
+            endX = getWidth() * 2;
+            endY = getHeight() * 2;
+        }
 
-        // Dynamic grid spacing based on powers of 2
+        double spacing = UNITS_PER_METER;
         double log2 = Math.log(camera.getScale()) / Math.log(2);
-        double spacing = UNITS_PER_METER * Math.pow(2, -Math.floor(log2));
+        spacing = UNITS_PER_METER * Math.pow(2, -Math.floor(log2));
 
         if (camera.getScale() * spacing < 50) {
             spacing *= 2;
@@ -117,8 +177,6 @@ public class RenderPanel extends JPanel {
             spacing /= 2;
         }
 
-
-        // Grid lines
         g2d.setColor(new Color(40, 40, 40));
         for (double x = Math.floor(startX / spacing) * spacing; x < endX; x += spacing) {
             line.setLine(x, startY, x, endY);
@@ -129,18 +187,16 @@ public class RenderPanel extends JPanel {
             g2d.draw(line);
         }
 
-        // Axes (brighter gray)
         g2d.setColor(new Color(80, 80, 80));
-        line.setLine(0, startY, 0, endY); // Y-axis
+        line.setLine(0, startY, 0, endY);
         g2d.draw(line);
-        line.setLine(startX, 0, endX, 0); // X-axis
+        line.setLine(startX, 0, endX, 0);
         g2d.draw(line);
     }
 
     private void drawWorld(Graphics2D g2d) {
         List<Body> bodies;
         synchronized (world) {
-            // Defensive copy to avoid ConcurrentModificationException
             bodies = new ArrayList<>(world.getBodies());
         }
 
@@ -154,11 +210,10 @@ public class RenderPanel extends JPanel {
         double bodyX = bodyPos.x() * UNITS_PER_METER;
         double bodyY = bodyPos.y() * UNITS_PER_METER;
 
-        // Draw Body AABB
         if (renderAABBs) {
             AABB bodyAabb = body.getAabb();
             if (bodyAabb != null) {
-                g2d.setColor(new Color(220, 0, 220)); // Magenta/Pink
+                g2d.setColor(new Color(220, 0, 220));
                 drawAABB(g2d, bodyAabb);
             }
         }
@@ -167,14 +222,12 @@ public class RenderPanel extends JPanel {
             drawCollider(g2d, collider, body.getAngle());
         }
 
-        // Draw center of mass on top
         g2d.setColor(Color.WHITE);
         ellipse.setFrame(bodyX - 2 / camera.getScale(), bodyY - 2 / camera.getScale(), 4 / camera.getScale(), 4 / camera.getScale());
         g2d.fill(ellipse);
     }
 
     private void drawCollider(Graphics2D g2d, Collider collider, double bodyAngle) {
-        // Draw Collider AABB
         if (renderAABBs) {
             AABB colliderAabb = collider.getAabb();
             if (colliderAabb != null) {
@@ -192,15 +245,23 @@ public class RenderPanel extends JPanel {
             double globalY = globalPos.y() * UNITS_PER_METER;
             double radius = circle.getRadius() * UNITS_PER_METER;
 
-            // Draw circle
-            g2d.setColor(new Color(0, 180, 0)); // A nice green
+            g2d.setColor(new Color(0, 180, 0));
             ellipse.setFrame(globalX - radius, globalY - radius, radius * 2, radius * 2);
             g2d.draw(ellipse);
 
-            // Draw angle indicator
             double totalAngle = bodyAngle + circle.getAngle();
             line.setLine(globalX, globalY, globalX + radius * Math.cos(totalAngle), globalY + radius * Math.sin(totalAngle));
             g2d.draw(line);
+        } else if (collider instanceof PolygonCollider polygon) {
+            List<Vector2D> worldVertices = polygon.getWorldVertices();
+            g2d.setColor(new Color(0, 150, 255));
+            int n = worldVertices.size();
+            for (int i = 0; i < n; i++) {
+                Vector2D v1 = worldVertices.get(i);
+                Vector2D v2 = worldVertices.get((i + 1) % n);
+                line.setLine(v1.x() * UNITS_PER_METER, v1.y() * UNITS_PER_METER, v2.x() * UNITS_PER_METER, v2.y() * UNITS_PER_METER);
+                g2d.draw(line);
+            }
         }
     }
 
