@@ -14,6 +14,8 @@ public class PhysicsWorld {
 
     private final List<Body> bodies = new ArrayList<>();
 
+    private boolean isPaused = false;
+
     public PhysicsWorld(double GRAVITY) {
         this.GRAVITY = GRAVITY;
         this.collisionDetector = new CollisionDetector();
@@ -29,6 +31,8 @@ public class PhysicsWorld {
     }
 
     public void step(double dt) {
+        if (isPaused) return;
+
         resetAccumulators();
         applyGravity();
 
@@ -56,5 +60,13 @@ public class PhysicsWorld {
             body.resetForce();
             body.resetTorque();
         }
+    }
+
+    public void togglePause() {
+        isPaused = !isPaused;
+    }
+
+    public boolean isPaused() {
+        return isPaused;
     }
 }

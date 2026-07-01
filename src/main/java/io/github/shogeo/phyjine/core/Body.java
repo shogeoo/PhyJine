@@ -97,7 +97,7 @@ public class Body {
     void applyForce(Vector2D force) {
         this.force = this.force.add(force);
     }
-    void applyTorque(double torque) {
+    public void applyTorque(double torque) {
         this.torque += torque;
     }
 

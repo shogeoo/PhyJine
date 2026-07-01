@@ -15,86 +15,76 @@ public class Main {
     static void main() {
         PhysicsWorld world = new PhysicsWorld(-9.81);
 
-        Material groundMaterial = new Material(0.0, 0, 0.8, 0.6);
-        Material dynamicMaterial = new Material(1.0, 0, 0.6, 0.4);
+        // --- Materials ---
+        // restitution (упругость): 0 - perfectly inelastic, 1 - perfectly elastic
+        // friction: static and kinetic friction coefficients
+        Material groundMaterial = new Material(0, 0.5, 0.8, 0.6); // Static material, density 0 means infinite mass
+        Material wood = new Material(700, 0.4, 0.7, 0.5);
+        Material stone = new Material(2500, 0.6, 0.8, 0.6);
+        Material steel = new Material(7850, 0.2, 0.4, 0.2);
 
-        // 1. Static Ground
-        List<Vector2D> groundVerts = createBoxVertices(15.0, 0.6);
-        PolygonCollider groundCollider = new PolygonCollider(new Vector2D(0, 0), 0.0, groundVerts, groundMaterial);
-        Body ground = new Body(new Vector2D(0, -5.0), 0.0, groundCollider);
+        // --- Ground ---
+        Body ground = new Body(
+                new Vector2D(0, -25), 0,
+                new PolygonCollider(new Vector2D(0, 0), 0, createBoxVertices(100, 50), groundMaterial)
+        );
         world.addBody(ground);
 
-        // 2. Static Funnel (Left slope and Right slope)
-        List<Vector2D> slopeVerts = createBoxVertices(5.0, 0.4);
-        
-        PolygonCollider leftSlopeCollider = new PolygonCollider(new Vector2D(0, 0), 0.0, slopeVerts, groundMaterial);
-        Body leftSlope = new Body(new Vector2D(-4.0, 1.0), 0.52, leftSlopeCollider); // ~30 degrees
-        world.addBody(leftSlope);
+        // --- Tower ---
+        int towerHeight = 10;
+        double boxWidth = 2.0;
+        double boxHeight = 1.0;
+        for (int i = 0; i < towerHeight; i++) {
+            Material material = (i % 3 == 0) ? stone : wood;
+            Body box = new Body(
+                    new Vector2D(0, boxHeight / 2 + i * boxHeight), 0,
+                    new PolygonCollider(new Vector2D(0, 0), 0, createBoxVertices(boxWidth, boxHeight), material)
+            );
+            world.addBody(box);
+        }
 
-        PolygonCollider rightSlopeCollider = new PolygonCollider(new Vector2D(0, 0), 0.0, slopeVerts, groundMaterial);
-        Body rightSlope = new Body(new Vector2D(4.0, 1.0), -0.52, rightSlopeCollider); // ~-30 degrees
-        world.addBody(rightSlope);
+        // --- Wrecking Ball ---
+        double wreckingBallRadius = 0.5;
+        Body wreckingBall = new Body(
+                new Vector2D(-15, 10), 0,
+                new CircleCollider(new Vector2D(0, 0), 0, wreckingBallRadius, steel)
+        );
+        wreckingBall.setVelocity(new Vector2D(20, 0)); // Give it an initial push
+        world.addBody(wreckingBall);
 
-        // 3. Static Hexagonal pegs/obstacles in the middle
-        List<Vector2D> pegVerts = createRegularPolygonVertices(6, 0.4);
-        PolygonCollider peg1Collider = new PolygonCollider(new Vector2D(0, 0), 0.0, pegVerts, groundMaterial);
-        Body peg1 = new Body(new Vector2D(0.0, -1.5), 0.0, peg1Collider);
-        world.addBody(peg1);
-
-        PolygonCollider peg2Collider = new PolygonCollider(new Vector2D(0, 0), 0.0, pegVerts, groundMaterial);
-        Body peg2 = new Body(new Vector2D(-2.5, -2.5), 0.2, peg2Collider);
-        world.addBody(peg2);
-
-        PolygonCollider peg3Collider = new PolygonCollider(new Vector2D(0, 0), 0.0, pegVerts, groundMaterial);
-        Body peg3 = new Body(new Vector2D(2.5, -2.5), -0.2, peg3Collider);
-        world.addBody(peg3);
-
-        // 4. Stacks of different shapes falling and colliding!
-        double startY = 4.0;
-        for (int i = 0; i < 8; i++) {
-            double offset = (i % 2 == 0) ? 0.1 : -0.1; // Slightly offset each layer to create dynamic sliding/tumbling
-            double y = startY + i * 1.5;
-
-            if (i % 4 == 0) {
-                // Falling Box
-                List<Vector2D> boxVerts = createBoxVertices(0.8, 0.8);
-                PolygonCollider boxCollider = new PolygonCollider(new Vector2D(0, 0), 0.0, boxVerts, dynamicMaterial);
-                Body box = new Body(new Vector2D(offset, y), 0.1 * i, boxCollider);
-                world.addBody(box);
-            } else if (i % 4 == 1) {
-                // Falling Circle
-                CircleCollider circleCollider = new CircleCollider(new Vector2D(0, 0), 0.0, 0.45, dynamicMaterial);
-                Body circle = new Body(new Vector2D(offset, y), 0.0, circleCollider);
-                world.addBody(circle);
-            } else if (i % 4 == 2) {
-                // Falling Triangle
-                List<Vector2D> triVerts = createRegularPolygonVertices(3, 0.5);
-                PolygonCollider triCollider = new PolygonCollider(new Vector2D(0, 0), 0.0, triVerts, dynamicMaterial);
-                Body triangle = new Body(new Vector2D(offset, y), 0.05 * i, triCollider);
-                world.addBody(triangle);
-            } else {
-                // Falling Pentagon
-                List<Vector2D> pentVerts = createRegularPolygonVertices(5, 0.5);
-                PolygonCollider pentCollider = new PolygonCollider(new Vector2D(0, 0), 0.0, pentVerts, dynamicMaterial);
-                Body pentagon = new Body(new Vector2D(offset, y), -0.05 * i, pentCollider);
-                world.addBody(pentagon);
+        // --- A more complex structure ---
+        // Let's build a pyramid
+        int pyramidHeight = 5;
+        double brickWidth = 1.0;
+        double brickHeight = 0.5;
+        for (int i = 0; i < pyramidHeight; i++) {
+            int numBricks = pyramidHeight - i;
+            for (int j = 0; j < numBricks; j++) {
+                double x = 10 + (j - (numBricks - 1) / 2.0) * brickWidth;
+                double y = brickHeight / 2 + i * brickHeight;
+                Body brick = new Body(
+                        new Vector2D(x, y), 0,
+                        new PolygonCollider(new Vector2D(0, 0), 0, createBoxVertices(brickWidth, brickHeight), stone)
+                );
+                world.addBody(brick);
             }
         }
 
-        // Additional side falling bodies to hit the slopes directly
-        for (int i = 0; i < 3; i++) {
-            double y = 6.0 + i * 2.0;
-            // Left falling circle
-            CircleCollider circleL = new CircleCollider(new Vector2D(0, 0), 0.0, 0.4, dynamicMaterial);
-            Body bodyL = new Body(new Vector2D(-4.5, y), 0.0, circleL);
-            world.addBody(bodyL);
-
-            // Right falling triangle
-            List<Vector2D> triVerts = createRegularPolygonVertices(3, 0.5);
-            PolygonCollider triR = new PolygonCollider(new Vector2D(0, 0), 0.0, triVerts, dynamicMaterial);
-            Body bodyR = new Body(new Vector2D(4.5, y), 0.1, triR);
-            world.addBody(bodyR);
+        // --- Dominoes ---
+        int numDominoes = 10;
+        double dominoWidth = 0.2;
+        double dominoHeight = 1.5;
+        for (int i = 0; i < numDominoes; i++) {
+            Body domino = new Body(
+                    new Vector2D(-10 - i * dominoHeight * 0.7, dominoHeight / 2), 0,
+                    new PolygonCollider(new Vector2D(0, 0), 0, createBoxVertices(dominoWidth, dominoHeight), wood)
+            );
+            if (i == 0) {
+                domino.applyTorque(-5000); // Push the first domino
+            }
+            world.addBody(domino);
         }
+
 
         Renderer renderer = new Renderer(world);
         new Thread(renderer).start();
@@ -124,13 +114,4 @@ public class Main {
         return verts;
     }
 
-    private static List<Vector2D> createRegularPolygonVertices(int numSides, double radius) {
-        List<Vector2D> verts = new ArrayList<>();
-        for (int i = 0; i < numSides; i++) {
-            // Start at angle -PI/2 (pointing up) to make regular polygons stand upright
-            double angle = -Math.PI / 2 + 2 * Math.PI * i / numSides;
-            verts.add(new Vector2D(radius * Math.cos(angle), radius * Math.sin(angle)));
-        }
-        return verts;
-    }
 }

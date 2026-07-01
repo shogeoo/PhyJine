@@ -10,10 +10,8 @@ public class CollisionSolver {
         for (CollisionManifold m : collisions) {
             resolvePositions(m);
         }
-        for (int i = 0; i < 1; i++) {
-            for (CollisionManifold m : collisions) {
-                resolveVelocities(m);
-            }
+        for (CollisionManifold m : collisions) {
+            resolveVelocities(m);
         }
     }
 

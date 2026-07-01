@@ -9,6 +9,8 @@ import io.github.shogeo.phyjine.core.utils.AABB;
 import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -37,6 +39,7 @@ public class RenderPanel extends Canvas implements Runnable {
         this.world = world;
         this.camera = new Camera();
         setBackground(Color.BLACK);
+        setFocusable(true);
 
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
@@ -73,6 +76,15 @@ public class RenderPanel extends Canvas implements Runnable {
         addMouseListener(mouseAdapter);
         addMouseMotionListener(mouseAdapter);
         addMouseWheelListener(mouseAdapter);
+
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    world.togglePause();
+                }
+            }
+        });
     }
 
     public void start() {
@@ -135,6 +147,10 @@ public class RenderPanel extends Canvas implements Runnable {
                     drawWorld(g2d);
 
                     g2d.setTransform(savedTransform);
+
+                    if (world.isPaused()) {
+                        drawPauseIndicator(g2d);
+                    }
                 }
                 finally {
                     g2d.dispose();
@@ -142,6 +158,16 @@ public class RenderPanel extends Canvas implements Runnable {
             } while (bs.contentsRestored());
             bs.show();
         } while (bs.contentsLost());
+    }
+
+    private void drawPauseIndicator(Graphics2D g2d) {
+        g2d.setColor(new Color(255, 255, 255, 200));
+        g2d.setFont(new Font("Arial", Font.BOLD, 48));
+        String text = "PAUSED";
+        FontMetrics fm = g2d.getFontMetrics();
+        int x = (getWidth() - fm.stringWidth(text)) / 2;
+        int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+        g2d.drawString(text, x, y);
     }
 
     private void drawGridAndAxes(Graphics2D g2d) {
