@@ -1,5 +1,6 @@
 package io.github.shogeo.phyjine.core;
 
+import io.github.shogeo.phyjine.core.utils.CollisionManifold;
 import io.github.shogeo.phyjine.core.utils.Vector2D;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.List;
 
 public class PhysicsWorld {
 
-    private final double GRAVITY;
+    private double GRAVITY;
 
     private final CollisionDetector collisionDetector;
     private final CollisionSolver collisionSolver;
@@ -28,6 +29,18 @@ public class PhysicsWorld {
 
     public List<Body> getBodies() {
         return bodies;
+    }
+
+    public void removeBody(Body body) {
+        bodies.remove(body);
+    }
+
+    public List<CollisionManifold> getCollisions() {
+        return collisionDetector.getCollisions();
+    }
+
+    public void setGravity(double gravity) {
+        this.GRAVITY = gravity;
     }
 
     public void step(double dt) {

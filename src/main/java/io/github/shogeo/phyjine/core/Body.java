@@ -1,8 +1,13 @@
 package io.github.shogeo.phyjine.core;
 
+import io.github.shogeo.phyjine.core.colliders.CircleCollider;
 import io.github.shogeo.phyjine.core.colliders.Collider;
+import io.github.shogeo.phyjine.core.colliders.PolygonCollider;
 import io.github.shogeo.phyjine.core.utils.AABB;
 import io.github.shogeo.phyjine.core.utils.Vector2D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Body {
     private final Collider[] colliders;
@@ -94,8 +99,14 @@ public class Body {
         angle += angularVelocity * dt;
     }
 
-    void applyForce(Vector2D force) {
+    public void applyForce(Vector2D force) {
         this.force = this.force.add(force);
+    }
+
+    public void applyForce(Vector2D force, Vector2D point) {
+        this.force = this.force.add(force);
+        Vector2D r = point.subtract(this.position);
+        this.torque += r.cross(force);
     }
     public void applyTorque(double torque) {
         this.torque += torque;
@@ -108,8 +119,52 @@ public class Body {
         this.torque = 0;
     }
 
+    public static Body box(Vector2D position, double angle, double width, double height, Material material) {
+        double w2 = width / 2;
+        double h2 = height / 2;
+        List<Vector2D> verts = new ArrayList<>();
+        verts.add(new Vector2D(-w2, -h2));
+        verts.add(new Vector2D(w2, -h2));
+        verts.add(new Vector2D(w2, h2));
+        verts.add(new Vector2D(-w2, h2));
+        return new Body(position, angle, new PolygonCollider(new Vector2D(0, 0), 0, verts, material));
+    }
 
-    double getMass() {
+    public static Body box(double x, double y, double angle, double width, double height, Material material) {
+        return box(new Vector2D(x, y), angle, width, height, material);
+    }
+
+    public static Body circle(Vector2D position, double angle, double radius, Material material) {
+        return new Body(position, angle, new CircleCollider(new Vector2D(0, 0), 0, radius, material));
+    }
+
+    public static Body circle(double x, double y, double angle, double radius, Material material) {
+        return circle(new Vector2D(x, y), angle, radius, material);
+    }
+
+    public static Body polygon(Vector2D position, double angle, List<Vector2D> vertices, Material material) {
+        return new Body(position, angle, new PolygonCollider(new Vector2D(0, 0), 0, vertices, material));
+    }
+
+    public static Body polygon(double x, double y, double angle, List<Vector2D> vertices, Material material) {
+        return polygon(new Vector2D(x, y), angle, vertices, material);
+    }
+
+    public static Body regularPolygon(Vector2D position, double angle, int vertexCount, double radius, Material material) {
+        List<Vector2D> verts = new ArrayList<>();
+        for (int i = 0; i < vertexCount; i++) {
+            double a = 2 * Math.PI * i / vertexCount;
+            verts.add(new Vector2D(Math.cos(a) * radius, Math.sin(a) * radius));
+        }
+        return polygon(position, angle, verts, material);
+    }
+
+    public static Body regularPolygon(double x, double y, double angle, int vertexCount, double radius, Material material) {
+        return regularPolygon(new Vector2D(x, y), angle, vertexCount, radius, material);
+    }
+
+
+    public double getMass() {
         return mass;
     }
     public double getInvMass() {
