@@ -15,6 +15,13 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jogamp.jogl:jogl-all:2.6.0")
+    implementation("org.jogamp.gluegen:gluegen-rt:2.6.0")
+    runtimeOnly("org.jogamp.jogl:jogl-all:2.6.0:natives-linux-amd64")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt:2.6.0:natives-linux-amd64")
+    runtimeOnly("org.jogamp.jogl:jogl-all:2.6.0:natives-windows-amd64")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt:2.6.0:natives-windows-amd64")
+
     testImplementation(platform("org.junit:junit-bom:6.0.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
