@@ -22,17 +22,37 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RenderPanel extends GLCanvas implements GLEventListener {
 
     private static final double UNITS_PER_METER = 100.0;
+    private static final double TRAJECTORY_MIN_STEP_PX = 0.75;
+    private static final int TRAJECTORY_MAX_POINTS = 262_144;
+
+    private static final Color[] BODY_PALETTE = {
+            new Color(255, 82, 82),
+            new Color(255, 210, 60),
+            new Color(70, 220, 255),
+            new Color(190, 255, 90),
+            new Color(255, 120, 210),
+            new Color(160, 130, 255),
+            new Color(255, 160, 60),
+            new Color(120, 255, 200),
+            new Color(255, 255, 255),
+            new Color(150, 150, 150)
+    };
 
     private final PhysicsWorld world;
     private final Camera camera = new Camera();
+    private final Map<Body, Color> bodyColors = new IdentityHashMap<>();
+    private final Map<Body, Trajectory> trajectories = new IdentityHashMap<>();
 
     private Point lastMousePos;
     private boolean renderAABBs = false;
+    private boolean renderTrajectories = true;
 
     public RenderPanel(PhysicsWorld world) {
         super(createCapabilities());
@@ -83,6 +103,8 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     world.togglePause();
+                } else if (e.getKeyCode() == KeyEvent.VK_T) {
+                    renderTrajectories = !renderTrajectories;
                 }
             }
         });
@@ -148,6 +170,10 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
         gl.glLineWidth(1.0f);
 
         drawGridAndAxes(gl);
+        if (renderTrajectories) {
+            updateTrajectories();
+            drawTrajectories(gl);
+        }
         drawWorld(gl);
 
         if (world.isPaused()) {
@@ -211,6 +237,41 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
         for (Body body : world.getBodies()) {
             drawBody(gl, body);
         }
+    }
+
+    private void updateTrajectories() {
+        double minStep = TRAJECTORY_MIN_STEP_PX / (camera.getScale() * UNITS_PER_METER);
+        double minStepSquared = minStep * minStep;
+        for (Body body : world.getBodies()) {
+            Trajectory trajectory = trajectories.computeIfAbsent(body, ignored -> new Trajectory());
+            if (trajectory.size() >= TRAJECTORY_MAX_POINTS) {
+                continue;
+            }
+            Vector2D position = body.getPosition();
+            if (trajectory.size() == 0 || trajectory.distanceSquaredToLast(position) >= minStepSquared) {
+                trajectory.add(position);
+            }
+        }
+    }
+
+    private void drawTrajectories(GL2 gl) {
+        gl.glLineWidth(1.0f);
+        for (Body body : world.getBodies()) {
+            Trajectory trajectory = trajectories.get(body);
+            if (trajectory == null || trajectory.size() < 2) {
+                continue;
+            }
+            glColor(gl, colorFor(body));
+            gl.glBegin(GL2.GL_LINE_STRIP);
+            for (int i = 0; i < trajectory.size(); i++) {
+                gl.glVertex2d(trajectory.x(i) * UNITS_PER_METER, trajectory.y(i) * UNITS_PER_METER);
+            }
+            gl.glEnd();
+        }
+    }
+
+    private Color colorFor(Body body) {
+        return bodyColors.computeIfAbsent(body, ignored -> BODY_PALETTE[bodyColors.size() % BODY_PALETTE.length]);
     }
 
     private void drawBody(GL2 gl, Body body) {
@@ -338,5 +399,48 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
 
     private void glColor(GL2 gl, Color color) {
         gl.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+    }
+
+    private static class Trajectory {
+        private double[] xs = new double[1024];
+        private double[] ys = new double[1024];
+        private int size = 0;
+
+        void add(Vector2D position) {
+            ensureCapacity(size + 1);
+            xs[size] = position.x();
+            ys[size] = position.y();
+            size++;
+        }
+
+        double x(int index) {
+            return xs[index];
+        }
+
+        double y(int index) {
+            return ys[index];
+        }
+
+        int size() {
+            return size;
+        }
+
+        double distanceSquaredToLast(Vector2D position) {
+            double dx = position.x() - xs[size - 1];
+            double dy = position.y() - ys[size - 1];
+            return dx * dx + dy * dy;
+        }
+
+        private void ensureCapacity(int required) {
+            if (required <= xs.length) {
+                return;
+            }
+            int newCapacity = xs.length;
+            while (newCapacity < required) {
+                newCapacity *= 2;
+            }
+            xs = java.util.Arrays.copyOf(xs, newCapacity);
+            ys = java.util.Arrays.copyOf(ys, newCapacity);
+        }
     }
 }
