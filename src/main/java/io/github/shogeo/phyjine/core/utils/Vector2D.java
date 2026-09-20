@@ -36,6 +36,6 @@ public record Vector2D(double x, double y) {
 
     public Vector2D normalized() {
         double len = length();
-        return new Vector2D(x / len, y / len);
+        return (len == 0) ? new Vector2D(0, 0) : new Vector2D(x / len, y / len);
     }
 }

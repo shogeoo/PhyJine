@@ -63,43 +63,41 @@ public class PhysicsWorld {
         }
     }
 
-    /*
     private void applyGravity() {
         for (Body body : bodies) {
             body.applyForce(new Vector2D(0, GRAVITY * body.getMass()));
         }
     }
-    */
 
-    private void applyGravity() {
-        // всемирное тяготение: каждая пара коллайдеров разных тел притягивается по закону F = G * m1 * m2 / r^2.
-        // Сила приложена в мировой точке коллайдера, поэтому тело из-за возникшего момента может вращаться.
-        for (int i = 0; i < bodies.size(); i++) {
-            Body bodyA = bodies.get(i);
-            for (int j = i + 1; j < bodies.size(); j++) {
-                Body bodyB = bodies.get(j);
-                for (Collider colliderA : bodyA.getColliders()) {
-                    Vector2D positionA = getColliderWorldPosition(bodyA, colliderA);
-                    for (Collider colliderB : bodyB.getColliders()) {
-                        Vector2D positionB = getColliderWorldPosition(bodyB, colliderB);
-
-                        Vector2D delta = positionB.subtract(positionA);
-                        double distanceSquared = delta.lengthSquared();
-                        if (distanceSquared == 0) {
-                            continue; // коллайдеры ровно в одной точке — пропускаем пару
-                        }
-
-                        double distance = Math.sqrt(distanceSquared);
-                        double forceMagnitude = GRAVITY * colliderA.getMass() * colliderB.getMass() / distanceSquared;
-                        Vector2D force = delta.multiply(forceMagnitude / distance);
-
-                        bodyA.applyForce(force, positionA);
-                        bodyB.applyForce(force.multiply(-1), positionB);
-                    }
-                }
-            }
-        }
-    }
+//    private void applyGravity() {
+//        // всемирное тяготение: каждая пара коллайдеров разных тел притягивается по закону F = G * m1 * m2 / r^2.
+//        // Сила приложена в мировой точке коллайдера, поэтому тело из-за возникшего момента может вращаться.
+//        for (int i = 0; i < bodies.size(); i++) {
+//            Body bodyA = bodies.get(i);
+//            for (int j = i + 1; j < bodies.size(); j++) {
+//                Body bodyB = bodies.get(j);
+//                for (Collider colliderA : bodyA.getColliders()) {
+//                    Vector2D positionA = getColliderWorldPosition(bodyA, colliderA);
+//                    for (Collider colliderB : bodyB.getColliders()) {
+//                        Vector2D positionB = getColliderWorldPosition(bodyB, colliderB);
+//
+//                        Vector2D delta = positionB.subtract(positionA);
+//                        double distanceSquared = delta.lengthSquared();
+//                        if (distanceSquared == 0) {
+//                            continue; // коллайдеры ровно в одной точке — пропускаем пару
+//                        }
+//
+//                        double distance = Math.sqrt(distanceSquared);
+//                        double forceMagnitude = GRAVITY * colliderA.getMass() * colliderB.getMass() / distanceSquared;
+//                        Vector2D force = delta.multiply(forceMagnitude / distance);
+//
+//                        bodyA.applyForce(force, positionA);
+//                        bodyB.applyForce(force.multiply(-1), positionB);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private Vector2D getColliderWorldPosition(Body body, Collider collider) {
         return body.getPosition().add(collider.getPosition().rotate(body.getAngle()));

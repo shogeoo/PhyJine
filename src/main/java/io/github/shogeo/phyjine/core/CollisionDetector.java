@@ -31,7 +31,7 @@ public class CollisionDetector {
             Vector2D v2 = vertices.get((i + 1) % n);
             Vector2D edge = v2.subtract(v1);
             Vector2D toPoint = p.subtract(v1);
-            if (edge.cross(toPoint) < -1e-6) {
+            if (edge.cross(toPoint) < 0) {
                 return false;
             }
         }
@@ -141,7 +141,7 @@ public class CollisionDetector {
         }
         if (closestVertex != null) {
             Vector2D dir = closestVertex.subtract(circleCenter);
-            if (dir.lengthSquared() > 1e-8) {
+            if (dir.lengthSquared() != 0.0) {
                 axes.add(dir.normalized());
             }
         }

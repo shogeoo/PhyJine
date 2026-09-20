@@ -53,6 +53,7 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
     private Point lastMousePos;
     private boolean renderAABBs = false;
     private boolean renderTrajectories = true;
+    private volatile boolean resetRequested = false;
 
     public RenderPanel(PhysicsWorld world) {
         super(createCapabilities());
@@ -105,6 +106,10 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
                     world.togglePause();
                 } else if (e.getKeyCode() == KeyEvent.VK_T) {
                     renderTrajectories = !renderTrajectories;
+                } else if (e.getKeyCode() == KeyEvent.VK_A) {
+                    renderAABBs = !renderAABBs;
+                } else if (e.getKeyCode() == KeyEvent.VK_R) {
+                    resetRequested = true;
                 }
             }
         });
@@ -340,32 +345,28 @@ public class RenderPanel extends GLCanvas implements GLEventListener {
         gl.glEnd();
     }
 
+    public boolean consumeResetRequested() {
+        if (!resetRequested) {
+            return false;
+        }
+
+        resetRequested = false;
+        return true;
+    }
+
+    public void clearSceneRenderData() {
+        trajectories.clear();
+        bodyColors.clear();
+    }
+
     private void drawPauseIndicator(GL2 gl, int width, int height) {
         glColor(gl, new Color(0, 0, 0, 150));
+
         gl.glBegin(GL2.GL_QUADS);
         gl.glVertex2d(0, 0);
         gl.glVertex2d(width, 0);
         gl.glVertex2d(width, height);
         gl.glVertex2d(0, height);
-        gl.glEnd();
-
-        double centerX = width / 2.0;
-        double centerY = height / 2.0;
-        double barWidth = width / 40.0;
-        double barHeight = height / 5.0;
-        double gap = barWidth * 0.6;
-
-        glColor(gl, Color.WHITE);
-        gl.glBegin(GL2.GL_QUADS);
-        gl.glVertex2d(centerX - gap - barWidth, centerY - barHeight / 2);
-        gl.glVertex2d(centerX - gap, centerY - barHeight / 2);
-        gl.glVertex2d(centerX - gap, centerY + barHeight / 2);
-        gl.glVertex2d(centerX - gap - barWidth, centerY + barHeight / 2);
-
-        gl.glVertex2d(centerX + gap, centerY - barHeight / 2);
-        gl.glVertex2d(centerX + gap + barWidth, centerY - barHeight / 2);
-        gl.glVertex2d(centerX + gap + barWidth, centerY + barHeight / 2);
-        gl.glVertex2d(centerX + gap, centerY + barHeight / 2);
         gl.glEnd();
     }
 

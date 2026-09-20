@@ -15,8 +15,10 @@ public class Main {
     private static final long SPIN_SAFETY_NANOS = 2_000_000L;
 
     public static void main(String[] args) throws Exception {
-        PhysicsWorld world = createDemoWorld();
+        PhysicsWorld world = new PhysicsWorld(-9.81);
         RenderPanel panel = new Renderer(world).start();
+
+        setPhysicsScence(world);
 
         double accumulator = 0.0;
         long previousTime = System.nanoTime();
@@ -24,6 +26,17 @@ public class Main {
 
         while (true) {
             long now = System.nanoTime();
+
+            if (panel.consumeResetRequested()) {
+                world.getBodies().clear();
+                setPhysicsScence(world);
+                panel.clearSceneRenderData();
+
+                accumulator = 0.0;
+                previousTime = now;
+                nextRenderTime = now;
+            }
+
             double elapsed = Math.min((now - previousTime) / 1_000_000_000.0, MAX_FRAME_TIME);
             previousTime = now;
 
@@ -70,32 +83,124 @@ public class Main {
         }
     }
 
-    private static PhysicsWorld createDemoWorld() {
-        // Задача трёх тел: устойчивая орбита в форме "восьмёрки" (Chenciner–Montgomery).
-        // Начальные условия рассчитаны на равные массы тел m = 1 и гравитационную постоянную G = 1.
-        double radius = 0.03;
-        double density = 1.0 / (Math.PI * radius * radius); // масса каждого коллайдера получается ровно 1
-        Material material = new Material(density, 0, 0, 0);
+    private static void setPhysicsScence(PhysicsWorld world){
+        Material staticMaterial = new Material(
+                0.0,    // density -> static body
+                0.2,    // restitution
+                0.8,    // static friction
+                0.6     // kinetic friction
+        );
 
-        PhysicsWorld world = new PhysicsWorld(1.0); // G — постоянная всемирного тяготения
+        Material bouncyMaterial = new Material(
+                1.0,
+                0.85,
+                0.4,
+                0.25
+        );
 
-        Vector2D[] positions = {
-                new Vector2D(-0.97000436, 0.24308753),
-                new Vector2D(0.97000436, -0.24308753),
-                new Vector2D(0, 0)
-        };
-        Vector2D[] velocities = {
-                new Vector2D(0.4662036850, 0.4323657300),
-                new Vector2D(0.4662036850, 0.4323657300),
-                new Vector2D(-0.93240737, -0.86473146)
-        };
+        Material normalMaterial = new Material(
+                1.0,
+                0.3,
+                0.6,
+                0.4
+        );
 
-        for (int i = 0; i < positions.length; i++) {
-            Body body = Body.circle(positions[i], 0, radius, material);
-            body.setVelocity(velocities[i]);
-            world.addBody(body);
+        Material slipperyMaterial = new Material(
+                1.0,
+                0.1,
+                0.05,
+                0.02
+        );
+
+
+// Ground
+        world.addBody(
+                Body.box(
+                        0.0, -3.0,
+                        0.0,
+                        12.0, 0.5,
+                        staticMaterial
+                )
+        );
+
+
+// Two static ramps
+        world.addBody(
+                Body.box(
+                        -3.5, -1.4,
+                        Math.toRadians(-15),
+                        4.0, 0.25,
+                        staticMaterial
+                )
+        );
+
+        world.addBody(
+                Body.box(
+                        3.5, -0.5,
+                        Math.toRadians(18),
+                        4.0, 0.25,
+                        staticMaterial
+                )
+        );
+
+
+// Bouncy circle
+        Body circle = Body.circle(
+                -3.5, 3.5,
+                0.0,
+                0.45,
+                bouncyMaterial
+        );
+        circle.setVelocity(new Vector2D(1.8, 0.0));
+        world.addBody(circle);
+
+
+// Rotating box
+        Body box = Body.box(
+                0.0, 4.5,
+                Math.toRadians(20),
+                1.2, 1.2,
+                normalMaterial
+        );
+        box.setVelocity(new Vector2D(0.4, 0.0));
+        box.setAngularVelocity(1.5);
+        world.addBody(box);
+
+
+// Polygon
+        Body polygon = Body.regularPolygon(
+                new Vector2D(2.0, 5.5),
+                0.0,
+                5,
+                0.65,
+                normalMaterial
+        );
+        polygon.setAngularVelocity(-2.0);
+        world.addBody(polygon);
+
+
+// Slippery body to make friction difference visible
+        Body slipperyBox = Body.box(
+                -1.5, 1.5,
+                Math.toRadians(5),
+                0.9, 0.9,
+                slipperyMaterial
+        );
+        slipperyBox.setVelocity(new Vector2D(3.0, 0.0));
+        world.addBody(slipperyBox);
+
+
+// Stack of boxes
+        for (int i = 0; i < 4; i++) {
+            Body stackBox = Body.box(
+                    1.0,
+                    -2.4 + i * 0.65,
+                    0.0,
+                    0.6, 0.6,
+                    normalMaterial
+            );
+
+            world.addBody(stackBox);
         }
-
-        return world;
     }
 }
